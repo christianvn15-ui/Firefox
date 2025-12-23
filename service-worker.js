@@ -1,5 +1,5 @@
 // Name of the cache
-const CACHE_NAME = "dstvprank-cache-v1";
+const CACHE_NAME = "dstvprank-cache-v2";
 
 // Files to cache
 const urlsToCache = [
@@ -19,6 +19,8 @@ self.addEventListener("install", event => {
       return cache.addAll(urlsToCache);
     })
   );
+  // Activate immediately after install
+  self.skipWaiting();
 });
 
 // Activate event - cleanup old caches
@@ -34,13 +36,27 @@ self.addEventListener("activate", event => {
       );
     })
   );
+  // Take control of all clients immediately
+  self.clients.claim();
 });
 
 // Fetch event - serve cached files if available
 self.addEventListener("fetch", event => {
   event.respondWith(
     caches.match(event.request).then(response => {
-      return response || fetch(event.request);
+      // Return cached response if found, else fetch from network
+      return response || fetch(event.request).then(networkResponse => {
+        // Cache new requests dynamically
+        return caches.open(CACHE_NAME).then(cache => {
+          cache.put(event.request, networkResponse.clone());
+          return networkResponse;
+        });
+      }).catch(() => {
+        // Optional: fallback offline page or image
+        if (event.request.destination === "document") {
+          return caches.match("/index.html");
+        }
+      });
     })
   );
 });
