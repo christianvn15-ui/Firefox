@@ -37,6 +37,14 @@
   <button id="installBtn">Install App</button>
 
   <script>
+
+    if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/sw.js")
+      .then(() => console.log("Service Worker registered"))
+      .catch(err => console.error("SW registration failed:", err));
+  }
+
+    
     let deferredPrompt;
     const installBtn = document.getElementById("installBtn");
 
@@ -75,3 +83,4 @@
   </script>
 </body>
 </html>
+
