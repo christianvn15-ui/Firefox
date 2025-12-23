@@ -1,70 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DStv - Watch Live sports and Catch Up on TV series, movies and kids shows online.</title>
-<style>
-  body {
-    background-image: url('dstvload.png');
-    background-size: cover;
-    transition: background-image 1s ease-in-out;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DStv - Watch Live sports and Catch Up on TV series, movies and kids shows online.</title>
+  <style>
+    body {
+      background-image: url('dstvload.png');
+      background-size: cover;
+      background-position: center;
+      transition: background-image 1s ease-in-out;
+      margin: 0;
+      height: 100vh;
+    }
 
     #installBtn {
-        background: white;
-        padding: 10px;
-        border: none;
-        border-radius: 10px;
-        
-</style>
+      background: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      display: none; /* hidden by default */
+    }
+
+    #installBtn:hover {
+      background: #f0f0f0;
+    }
+  </style>
 </head>
 <body>
-    <button id="installBtn" style="display:none;">Install App</button>
-<script>
+  <button id="installBtn">Install App</button>
+
+  <script>
     let deferredPrompt;
-const installBtn = document.getElementById("installBtn");
+    const installBtn = document.getElementById("installBtn");
 
-// Listen for the beforeinstallprompt event
-window.addEventListener("beforeinstallprompt", (e) => {
-  // Prevent the mini-infobar from appearing
-  e.preventDefault();
-  deferredPrompt = e;
+    // Listen for the beforeinstallprompt event
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
 
-  // Show the install button
-  installBtn.style.display = "block";
+      // Show the install button
+      installBtn.style.display = "block";
 
-  installBtn.addEventListener("click", () => {
-    // Show the install prompt
-    deferredPrompt.prompt();
+      installBtn.addEventListener("click", () => {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === "accepted") {
+            console.log("User accepted the install prompt");
+          } else {
+            console.log("User dismissed the install prompt");
+          }
+          deferredPrompt = null;
+          installBtn.style.display = "none"; // hide after attempt
+        });
+      });
+    });
 
-    // Wait for the user to respond
-    deferredPrompt.userChoice.then((choiceResult) => {
-      if (choiceResult.outcome === "accepted") {
-        console.log("User accepted the install prompt");
-      } else {
-        console.log("User dismissed the install prompt");
-      }
-      deferredPrompt = null;
-
-      // Hide the button after installation attempt
+    // Hide the button if the app is already installed
+    window.addEventListener("appinstalled", () => {
+      console.log("PWA was installed");
       installBtn.style.display = "none";
     });
-  });
-});
 
-// Hide the button if the app is already installed
-window.addEventListener("appinstalled", () => {
-  console.log("PWA was installed");
-  installBtn.style.display = "none";
-});
-    
-  setTimeout(() => {
-    document.body.style.backgroundImage = "url('aapie.png')";
-  }, 10000); // 10000 ms = 10 seconds
-</script>
+    // Background image swap after 10 seconds
+    setTimeout(() => {
+      document.body.style.backgroundImage = "url('aapie.png')";
+    }, 10000);
+  </script>
 </body>
-
-
 </html>
-
