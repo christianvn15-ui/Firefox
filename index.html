@@ -13,11 +13,50 @@
 </style>
 </head>
 <body>
+    <button id="installBtn" style="display:none;">Install App</button>
 <script>
+    let deferredPrompt;
+const installBtn = document.getElementById("installBtn");
+
+// Listen for the beforeinstallprompt event
+window.addEventListener("beforeinstallprompt", (e) => {
+  // Prevent the mini-infobar from appearing
+  e.preventDefault();
+  deferredPrompt = e;
+
+  // Show the install button
+  installBtn.style.display = "block";
+
+  installBtn.addEventListener("click", () => {
+    // Show the install prompt
+    deferredPrompt.prompt();
+
+    // Wait for the user to respond
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === "accepted") {
+        console.log("User accepted the install prompt");
+      } else {
+        console.log("User dismissed the install prompt");
+      }
+      deferredPrompt = null;
+
+      // Hide the button after installation attempt
+      installBtn.style.display = "none";
+    });
+  });
+});
+
+// Hide the button if the app is already installed
+window.addEventListener("appinstalled", () => {
+  console.log("PWA was installed");
+  installBtn.style.display = "none";
+});
+    
   setTimeout(() => {
     document.body.style.backgroundImage = "url('aapie.png')";
   }, 10000); // 10000 ms = 10 seconds
 </script>
 </body>
+
 
 </html>
